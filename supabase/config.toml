@@ -25,6 +25,14 @@ shadow_port = 54320
 # server_version;` on the remote database to check.
 major_version = 15
 
+# Seed automatico desativado.
+# supabase/seed.sql pressupoe uma organizacao e boards ja existentes, entao
+# falha em qualquer base limpa (RAISE EXCEPTION 'Sem organizacao'), abortando
+# o `supabase start`. Rode o seed manualmente depois de criar org, usuario
+# admin e ao menos um board.
+[db.seed]
+enabled = false
+
 [studio]
 enabled = true
 # Port to use for Supabase Studio.

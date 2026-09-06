@@ -150,6 +150,12 @@ COMMENT ON FUNCTION public.trigger_hitl_alerts() IS
 -- ============================================================================
 -- Marca como 'expired' as pending_advances além de 24h
 
+-- DROP necessario: esta migration muda o retorno de expire_old_pending_advances
+-- de RETURNS void (20260207100000 / 20260221200002) para
+-- RETURNS TABLE(expired_count BIGINT). CREATE OR REPLACE nao faz isso
+-- (SQLSTATE 42P13).
+DROP FUNCTION IF EXISTS public.expire_old_pending_advances();
+
 CREATE OR REPLACE FUNCTION public.expire_old_pending_advances()
   RETURNS TABLE(expired_count BIGINT) AS $$
 DECLARE
@@ -196,7 +202,7 @@ BEGIN
     'SELECT public.expire_old_pending_advances();'
   );
   RAISE NOTICE 'Created cron job: expire-hitl-pending (every 12 hours)';
-EXCEPTION WHEN undefined_object THEN
+EXCEPTION WHEN undefined_object OR invalid_schema_name OR undefined_function THEN
   RAISE NOTICE 'pg_cron extension not available. Jobs must be triggered manually.
     Call trigger_hitl_alerts() and expire_old_pending_advances() from application code.';
 END $$;
@@ -251,3 +257,8 @@ COMMENT ON TABLE public.ai_pending_stage_advances IS
    - View: vw_hitl_pending_by_age
    - pg_cron jobs (se disponível): hitl-pending-alerts (6h), expire-hitl-pending (12h)
    - Activity logging: type=''hitl_alert'' em deal_activities quando >24h sem revisão';
+
+-- Reaplica a protecao definida em 20260223000001_fix_rpc_anon_access.sql,
+-- descartada pelo DROP FUNCTION acima.
+REVOKE ALL ON FUNCTION public.expire_old_pending_advances() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.expire_old_pending_advances() TO service_role;
