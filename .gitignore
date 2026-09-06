@@ -95,3 +95,7 @@ debug_navigation_failed_*.png
 *.png
 .env*.local
 .dmux/
+
+# artefatos de desenvolvimento local
+dev.log
+supabase/.branches/
