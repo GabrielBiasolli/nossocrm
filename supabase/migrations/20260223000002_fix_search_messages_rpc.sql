@@ -7,8 +7,10 @@
 -- RLS applies, but explicit revoke prevents anon access attempts).
 -- =============================================================================
 
-REVOKE ALL ON FUNCTION public.search_messages(UUID, TEXT, INT) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.search_messages(UUID, TEXT, INT) TO authenticated;
+
+-- DROP required: this migration renames an OUT parameter (external_message_id
+-- -> external_id), which CREATE OR REPLACE cannot do (SQLSTATE 42P13).
+DROP FUNCTION IF EXISTS public.search_messages(UUID, TEXT, INT);
 
 CREATE OR REPLACE FUNCTION public.search_messages(
   p_conversation_id UUID,
@@ -55,3 +57,6 @@ BEGIN
   LIMIT LEAST(p_limit, 100);
 END;
 $$;
+
+REVOKE ALL ON FUNCTION public.search_messages(UUID, TEXT, INT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.search_messages(UUID, TEXT, INT) TO authenticated;

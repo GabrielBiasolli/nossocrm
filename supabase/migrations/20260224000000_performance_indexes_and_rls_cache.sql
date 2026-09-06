@@ -36,14 +36,14 @@ CREATE INDEX IF NOT EXISTS idx_deals_organization_id
 CREATE INDEX IF NOT EXISTS idx_leads_organization_id
   ON public.leads(organization_id);
 
--- ai_decisions.organization_id
-CREATE INDEX IF NOT EXISTS idx_ai_decisions_organization_id
-  ON public.ai_decisions(organization_id);
+-- ai_decisions: SEM indice de organization_id.
+-- A tabela public.ai_decisions nao possui a coluna organization_id (ver
+-- 20251201000000_schema_init.sql) e nenhuma migration a adiciona. O
+-- isolamento de ai_decisions e por user_id (20260221200000_fix_rls_org_scoping.sql).
 
--- messaging_webhook_events.organization_id
--- Used in webhook dedup checks and audit queries.
-CREATE INDEX IF NOT EXISTS idx_messaging_webhook_events_organization_id
-  ON public.messaging_webhook_events(organization_id);
+-- messaging_webhook_events: SEM indice de organization_id.
+-- A tabela nao possui essa coluna (ver 20260205100000_create_messaging_system.sql);
+-- e escopada por channel_id.
 
 
 -- ============================================================
